@@ -218,3 +218,4 @@ D:\Project\MarketAPI\MarketAPI\obj\Debug\net8.0\refint\MarketAPI.dll
 D:\Project\MarketAPI\MarketAPI\obj\Debug\net8.0\MarketAPI.pdb
 D:\Project\MarketAPI\MarketAPI\obj\Debug\net8.0\MarketAPI.genruntimeconfig.cache
 D:\Project\MarketAPI\MarketAPI\obj\Debug\net8.0\ref\MarketAPI.dll
+D:\Project\MarketAPI\MarketAPI\obj\Debug\net8.0\MarketAPI.sourcelink.json

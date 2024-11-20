@@ -18,7 +18,7 @@ public class ProductController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public string Store(string p_name, string p_quantity, int p_price, string p_country)
+    public IActionResult Store(string p_name, string p_quantity, int p_price, string p_country)
     {
         Product product = new Product()
         {
@@ -31,7 +31,7 @@ public class ProductController : ControllerBase
         dataContext.Products.Add(product);
         dataContext.SaveChanges();
         
-        return $"{p_name} dan {p_country} da ishlab chiqarilgan {p_price} so`m narxda {p_quantity} dona qo`shildi!";
+        return Ok("Product added!");
     }
 
     [HttpGet]
@@ -43,25 +43,25 @@ public class ProductController : ControllerBase
 
     [HttpGet]
     [Route("{id}")]
-    public string Show(int id)
+    public IActionResult Show(int id)
     {
         var product = dataContext.Products.FirstOrDefault(product => product.Id == id);
         if(product == null)
         {
-            return "Product not found!";
+            return NotFound();
         }
 
-        return product.Name;
+        return Ok(product);
     }
 
     [HttpPut]
     [Route("{id}")]
-    public string Update(int id, string p_name, string p_quantity, int p_price, string p_country)
+    public IActionResult Update(int id, string p_name, string p_quantity, int p_price, string p_country)
     {
         var product = dataContext.Products.FirstOrDefault(p => p.Id == id);
         if(product == null)
         {
-            return "Not found";
+            return NotFound();
         }
         product.Name = p_name;
         product.Quantity = p_quantity;
@@ -70,20 +70,20 @@ public class ProductController : ControllerBase
 
         dataContext.SaveChanges();
 
-        return $"Product with {id} updated";
+        return Ok();
     }
 
     [HttpDelete]
     [Route("{id}")]
-    public string Delete(int id)
+    public IActionResult Delete(int id)
     {
         var product = dataContext.Products.FirstOrDefault(p => p.Id == id);
-        if (product == null)
+        if (product is not null)
         {
             dataContext.Products.Remove(product);
             dataContext.SaveChanges();
         }
 
-        return "Deleted!";
+        return NoContent();
     }
 }

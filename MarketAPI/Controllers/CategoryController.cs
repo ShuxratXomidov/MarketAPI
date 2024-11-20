@@ -18,7 +18,7 @@ public class CategoryController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public Category Store(string c_type)
+    public IActionResult Store(string c_type)
     {
         Category category = new Category()
         {
@@ -28,7 +28,7 @@ public class CategoryController : ControllerBase
         dataContext.Categories.Add(category);
         dataContext.SaveChanges();
 
-        return category;
+        return Ok("Category added");
     }
 
     [HttpGet]
@@ -43,31 +43,46 @@ public class CategoryController : ControllerBase
 
     [HttpGet]
     [Route("{id}")]
-    public string Show(int id)
+    public IActionResult Show(int id)
     {
         var category = dataContext.Categories.FirstOrDefault(c => c.Id == id);
         if(category is null)
         {
-            return "Category is not found!";
+            return NotFound();
         }
 
-        return category.Type;
+        return Ok(category);
     }
 
     [HttpPut]
     [Route("{id}")]
-    public string Update(int id, string c_type)
+    public IActionResult Update(int id, string c_type)
     {
         var category = dataContext.Categories.FirstOrDefault(c => c.Id == id);
         if(category is null)
         {
-            return "Category is not found!";
+            return NotFound();
         }
 
         category.Type = c_type;
 
         dataContext.SaveChanges();
 
-        return category.Type;
+        return Ok();
+    }
+
+
+    [HttpDelete]
+    [Route("{id}")]
+    public IActionResult Delete(int id)
+    {
+        var category = dataContext.Categories.FirstOrDefault(c => c.Id == id);
+        if(category is not null)
+        {
+            dataContext.Categories.Remove(category);
+            dataContext.SaveChanges();
+        }
+
+        return NoContent();
     }
 }

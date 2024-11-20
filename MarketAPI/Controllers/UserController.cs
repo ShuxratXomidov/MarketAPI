@@ -18,7 +18,7 @@ public class UserController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public User Store(string user_firstname, string user_lastname, int user_age, string user_city)
+    public IActionResult Store(string user_firstname, string user_lastname, int user_age, string user_city)
     {
         User user = new User()
         {
@@ -31,7 +31,7 @@ public class UserController : ControllerBase
         dataContext.Users.Add(user);
         dataContext.SaveChanges();
 
-        return user;
+        return Ok("User added!");
     }
 
     [HttpGet]
@@ -45,25 +45,25 @@ public class UserController : ControllerBase
 
     [HttpGet]
     [Route("{id}")]
-    public string Show(int id)
+    public IActionResult Show(int id)
     {
         var user = dataContext.Users.FirstOrDefault(u => u.Id == id);
         if (user is null)
         {
-            return "User is not found!";
+            return NotFound();
         }
 
-        return user.FirstName;
+        return Ok(user);
     }
 
     [HttpPut]
     [Route("{id}")]
-    public string Update (int id, string user_firstname, string user_lastname, int user_age, string user_city)
+    public IActionResult Update (int id, string user_firstname, string user_lastname, int user_age, string user_city)
     {
         var user = dataContext.Users.FirstOrDefault(u => u.Id == id);
         if(user is null)
         {
-            return "User is not found!";
+            return NotFound();
         }
 
         user.FirstName = user_firstname;
@@ -73,22 +73,20 @@ public class UserController : ControllerBase
 
         dataContext.SaveChanges();
 
-        return "User changes!";
+        return Ok();
     }
 
     [HttpDelete]
     [Route("{id}")]
-    public string Delete(int id)
+    public IActionResult Delete(int id)
     {
         var user = dataContext.Users.FirstOrDefault(u => u.Id == id);
-        if(user is null)
+        if(user is not null)
         {
-            return "User is not found";
+            dataContext.Users.Remove(user);
+            dataContext.SaveChanges();
         }
 
-        dataContext.Users.Remove(user);
-        dataContext.SaveChanges();
-
-        return "Deleted";
+        return NoContent();
     }
 }
