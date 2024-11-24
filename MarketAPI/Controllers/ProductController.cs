@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MarketAPI.Models;
+using Bogus;
+using Bogus.DataSets;
 
 namespace MarketAPI.Controllers;
 
@@ -18,14 +20,13 @@ public class ProductController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public IActionResult Store(string p_name, string p_quantity, int p_price, string p_country)
+    public IActionResult Store(string p_name, int p_quantity, decimal p_price)
     {
         Product product = new Product()
         {
             Name = p_name,
             Quantity = p_quantity,
             Price = p_price,
-            Country = p_country
         };
 
         dataContext.Products.Add(product);
@@ -36,11 +37,26 @@ public class ProductController : ControllerBase
 
     [HttpGet]
     [Route("")]
-    public List<Product> Index()
+    public IActionResult Index()
     {
-        return dataContext.Products.ToList();
-    }
+        // create fake products
+        var faker = new Faker<Product>("en")
+            .RuleFor(p => p.Name, f => f.Commerce.Product())
+            .RuleFor(p => p.Quantity, f => Random.Shared.Next(0, 50))
+            .RuleFor(p => p.Price, f => Convert.ToDecimal(f.Commerce.Price()));
+            
+        var fakeProducts = faker.Generate(40);
 
+        // database save
+        dataContext.Products.AddRange(fakeProducts);
+        dataContext.SaveChanges();
+
+        // return result
+        var products = dataContext.Products.ToList();
+
+        return Ok(products);
+    }
+    
     [HttpGet]
     [Route("{id}")]
     public IActionResult Show(int id)
@@ -56,7 +72,7 @@ public class ProductController : ControllerBase
 
     [HttpPut]
     [Route("{id}")]
-    public IActionResult Update(int id, string p_name, string p_quantity, int p_price, string p_country)
+    public IActionResult Update(int id, string p_name, int p_quantity, decimal p_price)
     {
         var product = dataContext.Products.FirstOrDefault(p => p.Id == id);
         if(product == null)
@@ -66,7 +82,6 @@ public class ProductController : ControllerBase
         product.Name = p_name;
         product.Quantity = p_quantity;
         product.Price = p_price;
-        product.Country = p_country;
 
         dataContext.SaveChanges();
 
