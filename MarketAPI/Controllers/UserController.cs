@@ -1,7 +1,9 @@
 ﻿using MarketAPI.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MarketAPI.Services;
 using MarketAPI.Models;
+
 
 namespace MarketAPI.Controllers;
 
@@ -9,83 +11,43 @@ namespace MarketAPI.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly DataContext dataContext;
+    private readonly IUserService userService;
 
-    public UserController(DataContext dataContext)
+    public UserController(IUserService userService)
     {
-        this.dataContext = dataContext;
+        this.userService = userService;
     }
 
     [HttpPost]
     [Route("")]
-    public IActionResult Store(string user_firstname, string user_lastname, int user_age, string user_city)
+    public IActionResult Store([FromBody] UserCreateRequest newUser)
     {
-        User user = new User()
-        {
-            FirstName = user_firstname,
-            LastName = user_lastname,
-            Age = user_age,
-            City = user_city
-        };
-
-        dataContext.Users.Add(user);
-        dataContext.SaveChanges();
-
-        return Ok("User added!");
+        int id = this.userService.Create(newUser.FirstName, newUser.LastName, newUser.Age, newUser.City);
+        return Ok(id);
     }
 
     [HttpGet]
     [Route("")]
-    public List<User> Index()
+    public IActionResult Index()
     {
-        List<User> user = dataContext.Users.ToList();
-
-        return user;
-    }
-
-    [HttpGet]
-    [Route("{id}")]
-    public IActionResult Show(int id)
-    {
-        var user = dataContext.Users.FirstOrDefault(u => u.Id == id);
-        if (user is null)
-        {
-            return NotFound();
-        }
-
-        return Ok(user);
+       var users = this.userService.GetAll();
+        return Ok(users);
     }
 
     [HttpPut]
     [Route("{id}")]
-    public IActionResult Update (int id, string user_firstname, string user_lastname, int user_age, string user_city)
+    public IActionResult Update (int id, string firstName, string lastName, int age, string city)
     {
-        var user = dataContext.Users.FirstOrDefault(u => u.Id == id);
-        if(user is null)
-        {
-            return NotFound();
-        }
-
-        user.FirstName = user_firstname;
-        user.LastName = user_lastname;
-        user.Age = user_age;
-        user.City = user_city;
-
-        dataContext.SaveChanges();
-
-        return Ok();
+        var result = this.userService.Update(id, firstName, lastName, age, city);
+ 
+        return Ok(result);
     }
 
     [HttpDelete]
     [Route("{id}")]
     public IActionResult Delete(int id)
     {
-        var user = dataContext.Users.FirstOrDefault(u => u.Id == id);
-        if(user is not null)
-        {
-            dataContext.Users.Remove(user);
-            dataContext.SaveChanges();
-        }
+       this.userService.Delete(id);
 
         return NoContent();
     }
